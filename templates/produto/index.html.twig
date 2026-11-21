@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Produtos | Controle de Estoque{% endblock %}
+
+{% block body %}
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h1 class="h3 mb-1">Produtos</h1>
+            <p class="text-muted mb-0">Cadastre produtos e movimente o estoque.</p>
+        </div>
+        <a class="btn btn-primary" href="{{ path('app_produto_new') }}">Novo produto</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Categoria</th>
+                        <th class="text-end">Valor</th>
+                        <th class="text-center">Estoque</th>
+                        <th class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for produto in produtos %}
+                    <tr>
+                        <td>{{ produto.id }}</td>
+                        <td>
+                            <strong>{{ produto.nome }}</strong>
+                            {% if produto.descricao %}
+                                <div class="text-muted small">{{ produto.descricao }}</div>
+                            {% endif %}
+                        </td>
+                        <td>{{ produto.categoria ? produto.categoria.nome : 'Sem categoria' }}</td>
+                        <td class="text-end">R$ {{ produto.valor|number_format(2, ',', '.') }}</td>
+                        <td class="text-center">
+                            <span class="badge {{ produto.quantidade > 0 ? 'text-bg-success' : 'text-bg-secondary' }}">{{ produto.quantidade }}</span>
+                        </td>
+                        <td class="text-end text-nowrap">
+                            <form method="post" action="{{ path('app_produto_add', {'id': produto.id}) }}" class="d-inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('estoque_adicionar' ~ produto.id) }}">
+                                <button class="btn btn-sm btn-outline-success" type="submit" title="Adicionar uma unidade">+1</button>
+                            </form>
+                            <form method="post" action="{{ path('app_produto_sell', {'id': produto.id}) }}" class="d-inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('estoque_vender' ~ produto.id) }}">
+                                <button class="btn btn-sm btn-outline-warning" type="submit" title="Remover uma unidade"{{ produto.quantidade <= 0 ? ' disabled' : '' }}>-1</button>
+                            </form>
+                            <a class="btn btn-sm btn-outline-primary" href="{{ path('app_produto_edit', {'id': produto.id}) }}">Editar</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">Nenhum produto cadastrado.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
