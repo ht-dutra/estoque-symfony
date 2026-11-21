@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}Controle de Estoque{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>📦</text></svg>">
         {% block stylesheets %}
+            <link rel="stylesheet" href="{{ asset('vendor/bootstrap/dist/css/bootstrap.min.css') }}">
+            <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
         {% endblock %}
 
         {% block javascripts %}
@@ -18,7 +21,48 @@
         <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
         {% endif %}
     </head>
-    <body>
-        {% block body %}{% endblock %}
+    <body class="bg-light">
+        {% if app.user %}
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+                <div class="container">
+                    <a class="navbar-brand fw-semibold" href="{{ path('app_app') }}">📦 Estoque</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal" aria-controls="menuPrincipal" aria-expanded="false" aria-label="Abrir menu">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="menuPrincipal">
+                        {% set rota = app.request.attributes.get('_route') %}
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item">
+                                <a class="nav-link{{ rota == 'app_app' ? ' active' }}" href="{{ path('app_app') }}">Painel</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link{{ rota starts with 'app_categoria' ? ' active' }}" href="{{ path('app_categoria_index') }}">Categorias</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link{{ rota starts with 'app_produto' ? ' active' }}" href="{{ path('app_produto_index') }}">Produtos</a>
+                            </li>
+                        </ul>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="text-white-50 small">{{ app.user.userIdentifier }}</span>
+                            <a class="btn btn-outline-light btn-sm" href="{{ logout_path() }}">Sair</a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        {% endif %}
+
+        <main class="container pb-5">
+            {% for type, mensagens in app.flashes %}
+                {% set classe = type == 'error' ? 'danger' : type %}
+                {% for mensagem in mensagens %}
+                    <div class="alert alert-{{ classe }} alert-dismissible fade show" role="alert">
+                        {{ mensagem }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            {% block body %}{% endblock %}
+        </main>
     </body>
 </html>
